@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Elektrik şema PDF analiz ve arıza bulma aracı"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E⚡%3C/text%3E%3C/svg%3E"><title>AHEASE PRO ONLİNE</title>
+<style>
+:root{--d:#17232d;--r:#244b62;--a:#0aa58d;--line:#d8e1e6}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;height:100vh;overflow:hidden;background:#edf2f5;color:#17232d}
+header{height:116px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:14px 18px;position:relative}.brand{min-width:240px}.brand h1{margin:0;font-size:23px}.brand b{color:var(--a)}.brand small{color:#687782}
+.fault{flex:1}.fault label{font-weight:700;display:block;margin-bottom:6px}.fault input{width:100%;padding:12px;border:1px solid #b9c5cd;border-radius:8px;font-size:15px}.btn{border:0;border-radius:8px;padding:11px 13px;font-weight:700;cursor:pointer}.primary{background:var(--a);color:#fff}.soft{background:#e9eff2}.greet{position:absolute;right:18px;top:5px;font-size:12px;color:#64737d}
+.grid{height:calc(100vh - 116px);display:grid;grid-template-columns:290px minmax(430px,1fr) 330px}.left,.right{color:#fff;overflow:auto}.left{background:var(--d)}.right{background:var(--r)}.panel{padding:14px}.panel h2{font-size:14px;margin:0 0 10px}.count{font-size:12px;opacity:.8;margin-bottom:10px}.item{padding:9px 10px;margin:6px 0;border:1px solid #ffffff25;border-radius:8px;background:#ffffff0d;cursor:pointer}.item:hover,.item.active{background:#0aa58d55}.item small{opacity:.8}
+.center{background:#fff;overflow-y:auto;padding:0 16px 30px;scroll-behavior:smooth}.top{position:sticky;top:0;z-index:8;background:#fff;display:flex;justify-content:space-between;align-items:center;padding:12px 0 9px;border-bottom:1px solid #e5ebee}.badge{background:#edf3f5;padding:8px 12px;border-radius:8px;font-weight:bold}.status{font-size:12px;color:#65747e;margin-top:4px}.progress{height:5px;background:#e5ecef;margin-top:6px;border-radius:4px;overflow:hidden}.bar{height:100%;width:0;background:var(--a)}
+.drop{max-width:930px;margin:16px auto;padding:22px;text-align:center;border:2px dashed #aab8c2;border-radius:12px;background:#fafcfd}.drop.over{border-color:var(--a);background:#edfffb}.pages{max-width:1050px;margin:auto}.page{margin:18px auto;background:#f5f8f9;border:1px solid #d5dfe4;border-radius:10px;padding:10px}.ph{display:flex;justify-content:space-between;padding:5px 6px 9px;font-weight:bold;color:#5e6d77}.page canvas{display:block;max-width:100%;height:auto;margin:auto;background:#fff;box-shadow:0 1px 8px #0002}.page{position:relative}.canvasWrap{position:relative;width:max-content;max-width:100%;margin:auto}.markLayer{position:absolute;inset:0;pointer-events:none}.refMark{position:absolute;border:4px solid #e53935;background:#ffeb3b55;border-radius:50%;box-shadow:0 0 0 3px #fff8;animation:pulseMark 1.1s ease-in-out 3}@keyframes pulseMark{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}.empty{padding:90px 20px;text-align:center;color:#71808a}
+.tabs{display:flex;margin:-14px -14px 12px}.tab{flex:1;text-align:center;padding:13px 5px;background:#0002;font-weight:bold;cursor:pointer}.tab.active{background:var(--a)}.librow{display:flex;gap:5px;align-items:center}.librow span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mini{border:0;border-radius:5px;padding:5px;cursor:pointer}
+.modal{display:none;position:fixed;z-index:30;width:390px;background:#fff;border:1px solid #c3cfd6;border-radius:10px;box-shadow:0 18px 55px #0004}.mh{padding:11px;background:var(--d);color:#fff;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;cursor:move}.mb{padding:14px}.cause{padding:9px;border:1px solid #dce4e9;border-radius:7px;margin:8px 0;cursor:pointer}.cause:hover{background:#edf9f7}.warn{background:#fff5db;border:1px solid #eed28c;padding:10px;border-radius:8px;color:#6b5414}.locHint{position:absolute;z-index:4;border:2px dashed #e53935;background:#ffeb3b22;border-radius:10px;pointer-events:none}.toast{display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#17232d;color:#fff;padding:10px 16px;border-radius:8px;z-index:40}
+@media(max-width:950px){.grid{grid-template-columns:220px 1fr}.right{display:none}.brand{min-width:175px}}
+.srch{width:100%;padding:9px;border:0;border-radius:7px;margin-bottom:8px;font-size:13px}.zoomb{display:inline-flex;gap:4px;margin-right:8px;vertical-align:middle}.zoomed .page{overflow:auto}.zoomed .canvasWrap{max-width:none}.zoomed .page canvas{max-width:none}#panelBtn{display:none}
+@media(max-width:950px){#panelBtn{display:block}.right.open{display:block;position:fixed;right:0;top:116px;bottom:0;width:300px;z-index:20;box-shadow:-8px 0 30px #0005}}
+.kbox{background:#f1f8f6;border:1px solid #bfe3db;border-radius:8px;padding:10px;margin:8px 0}.kbox b{display:block;margin:8px 0 4px}.ck{display:flex;gap:8px;margin:5px 0;font-size:13px;cursor:pointer;align-items:flex-start}.ck input:checked+span{text-decoration:line-through;opacity:.55}.mb{max-height:70vh;overflow:auto}
+</style></head><body>
+<header><div class="brand"><h1>AHEASE <b>PRO ONLİNE</b></h1><small data-i18n="sub"></small></div>
+<div class="fault"><label data-i18n="ask"></label><input id="fault" data-i18n-ph="ph"></div>
+<button class="btn primary" id="newFile" data-i18n="newf"></button><button class="btn soft" id="nameBtn" data-i18n="name"></button><button class="btn soft" id="panelBtn" data-i18n="panel"></button><select id="lang" class="btn soft" aria-label="Language"></select><div class="greet" id="greet"></div><input id="picker" type="file" hidden accept=".pdf">
+</header><div class="grid">
+<aside class="left"><div class="panel"><h2 data-i18n="elh"></h2><div class="count" id="elCount">PDF bekleniyor</div><input id="elSearch" class="srch" data-i18n-ph="srch"><button class="btn soft" id="csvBtn" data-i18n="csv" style="width:100%;margin-bottom:8px"></button><div id="elements"></div></div></aside>
+<main class="center" id="center"><div class="top"><div><b id="title" data-i18n="view"></b><div class="status" id="status">PDF motoru hazırlanıyor…</div><div class="progress"><div class="bar" id="bar"></div></div></div><span><span class="zoomb"><button class="mini" id="zo" title="Küçült">−</button><button class="mini" id="zi" title="Büyüt">+</button></span><span class="badge" id="badge">SAYFA 0/0</span></span></div>
+<div class="drop" id="drop" data-i18n-html="drop"></div><div class="pages" id="pages"><div class="empty" data-i18n="empty"></div></div></main>
+<aside class="right"><div class="panel"><div class="tabs"><div class="tab active" data-tab="eq" data-i18n="tabEq"></div><div class="tab" data-tab="lib" data-i18n="tabLib"></div></div><div id="eq"><div class="count" id="eqCount">PDF bekleniyor</div><div id="equipment"></div></div><div id="lib" style="display:none"><button class="btn primary" id="newFile2" data-i18n="upl" style="width:100%"></button><div id="library"></div></div></div></aside>
+</div><div class="modal" id="modal"><div class="mh" id="mh"><span id="mt"></span><button class="mini" id="mx">×</button></div><div class="mb" id="mb"></div></div><div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);function getLib(){try{return getLib()}catch(e){return[]}} /* ---- Çoklu dil altyapısı (i18n) ---- */
+const LANGS={tr:"Türkçe",en:"English",de:"Deutsch",es:"Español",ru:"Русский"};
+let LANG=(()=>{try{return localStorage.aheLang}catch(e){}})()||(navigator.language||"en").slice(0,2).toLowerCase();if(!LANGS[LANG])LANG="en";
+/* sıra: [tr, en, de, es, ru] — eksik dil İngilizceye, o da yoksa Türkçeye düşer */
+const D={
+sub:["Fault Engine • Elektrik Şema Analiz","Fault Engine • Electrical Schematic Analysis","Fault Engine • Analyse elektrischer Schaltpläne","Fault Engine • Análisis de esquemas eléctricos","Fault Engine • Анализ электросхем"],
+ask:["Merhaba, lütfen arızayı bu satırda belirtin.","Hello, please describe the fault on this line.","Hallo, bitte beschreiben Sie die Störung in dieser Zeile.","Hola, describe la avería en esta línea.","Здравствуйте, опишите неисправность в этой строке."],
+ph:["Örn: Jeneratör No.1 start almıyor — Enter","e.g. Generator No.1 will not start — Enter","z. B. Generator Nr. 1 startet nicht — Enter","p. ej. El generador n.º 1 no arranca — Enter","напр.: Генератор №1 не запускается — Enter"],
+newf:["Yeni Dosya","New File","Neue Datei","Nuevo archivo","Новый файл"],
+name:["İsim","Name","Name","Nombre","Имя"],
+panel:["Ekipmanlar","Equipment","Ausrüstung","Equipos","Оборудование"],
+elh:["DEVRE ELEMANLARI","CIRCUIT ELEMENTS","SCHALTELEMENTE","ELEMENTOS DEL CIRCUITO","ЭЛЕМЕНТЫ СХЕМЫ"],
+wait:["PDF bekleniyor","Waiting for PDF","Warte auf PDF","Esperando PDF","Ожидание PDF"],
+srch:["Eleman ara (K5, KM1…)","Search element (K5, KM1…)","Element suchen (K5, KM1…)","Buscar elemento (K5, KM1…)","Поиск элемента (K5, KM1…)"],
+csv:["CSV olarak indir","Download as CSV","Als CSV herunterladen","Descargar como CSV","Скачать CSV"],
+view:["ŞEMA GÖRÜNTÜLEME","SCHEMATIC VIEWER","SCHALTPLAN-ANSICHT","VISOR DE ESQUEMAS","ПРОСМОТР СХЕМЫ"],
+eng:["PDF motoru hazırlanıyor…","Preparing PDF engine…","PDF-Engine wird vorbereitet…","Preparando motor PDF…","Подготовка PDF-движка…"],
+page:["SAYFA {0}/{1}","PAGE {0}/{1}","SEITE {0}/{1}","PÁGINA {0}/{1}","СТРАНИЦА {0}/{1}"],
+pageN:["SAYFA {0}","PAGE {0}","SEITE {0}","PÁGINA {0}","СТРАНИЦА {0}"],
+pageW:["Sayfa {0}","Page {0}","Seite {0}","Página {0}","Страница {0}"],
+drop:["<b>PDF elektrik şemasını buraya sürükleyip bırak</b><br>veya “Yeni Dosya” düğmesine bas<br><small>İnternet bağlantısı gereklidir. Tüm sayfalar alt alta görüntülenir ve metin katmanı analiz edilir.</small>","<b>Drag and drop the PDF electrical schematic here</b><br>or press “New File”<br><small>An internet connection is required. All pages are shown one below the other and the text layer is analysed.</small>","<b>PDF-Schaltplan hierher ziehen</b><br>oder auf „Neue Datei“ klicken<br><small>Internetverbindung erforderlich. Alle Seiten werden untereinander angezeigt und die Textebene wird analysiert.</small>","<b>Arrastra aquí el esquema eléctrico en PDF</b><br>o pulsa «Nuevo archivo»<br><small>Se requiere conexión a internet. Todas las páginas se muestran una debajo de otra y se analiza la capa de texto.</small>","<b>Перетащите PDF-схему сюда</b><br>или нажмите «Новый файл»<br><small>Требуется интернет. Все страницы отображаются друг под другом, текстовый слой анализируется.</small>"],
+empty:["PDF yüklendiğinde bütün sayfalar burada görüntülenecek ve analiz edilecek.","When a PDF is loaded, all pages will be shown and analysed here.","Nach dem Laden einer PDF werden alle Seiten hier angezeigt und analysiert.","Al cargar un PDF, todas las páginas se mostrarán y analizarán aquí.","После загрузки PDF все страницы будут показаны и проанализированы здесь."],
+tabEq:["EKİPMANLAR","EQUIPMENT","AUSRÜSTUNG","EQUIPOS","ОБОРУДОВАНИЕ"],
+tabLib:["DOSYA KÜTÜPHANESİ","FILE LIBRARY","DATEIBIBLIOTHEK","BIBLIOTECA","БИБЛИОТЕКА"],
+upl:["+ Yeni PDF Yükle","+ Upload new PDF","+ Neue PDF hochladen","+ Subir nuevo PDF","+ Загрузить PDF"],
+greet:["Hoş geldin, {0} 👋","Welcome, {0} 👋","Willkommen, {0} 👋","Bienvenido, {0} 👋","Добро пожаловать, {0} 👋"],
+conn:["PDF motoru bağlanıyor ({0}/3)…","Connecting PDF engine ({0}/3)…"],
+ready:["PDF motoru hazır — dosya seçebilirsin","PDF engine ready — you can choose a file","PDF-Engine bereit — Datei auswählen","Motor PDF listo — elige un archivo","PDF-движок готов — выберите файл"],
+nocdn:["PDF motoruna bağlanılamadı — internet/CDN erişimini kontrol et","Could not reach the PDF engine — check your internet/CDN access"],
+ocrNoPos:["{0} — PDF metninde konum yok. OCR görüntü taraması başlıyor…","{0} — no position in the PDF text. Starting OCR image scan…"],
+marked:["{0} işaretlendi — Sayfa {1}","{0} marked — Page {1}","{0} markiert — Seite {1}","{0} marcado — Página {1}","{0} отмечен — Страница {1}"],
+matches:[" • {0} eşleşme"," • {0} matches"," • {0} Treffer"," • {0} coincidencias"," • совпадений: {0}"],
+ocrNo:["{0} — OCR motoruna bağlanılamadı. Doğru sayfa açıldı.","{0} — OCR engine unavailable. The correct page was opened."],
+ocrPrep:["YÜKSEK ÇÖZÜNÜRLÜKLÜ OCR HAZIRLANIYOR — {0} • Sayfa {1}/{2}","PREPARING HIGH-RESOLUTION OCR — {0} • Page {1}/{2}"],
+ocrProg:["YÜKSEK ÇÖZÜNÜRLÜKLÜ OCR — {0} • %{1}","HIGH-RESOLUTION OCR — {0} • {1}%"],
+ocrNF:["OCR tamamlandı — {0} görüntüde kesin bulunamadı","OCR finished — {0} could not be located precisely"],
+ocrNFt:["{0} — Sayfa {1} doğru; OCR kesin konumu bulamadı.","{0} — Page {1} is correct; OCR could not find the exact position."],
+ocrOK:["OCR BULDU — {0} • Sayfa {1}/{2}","OCR FOUND — {0} • Page {1}/{2}"],
+ocrOKt:["{0} OCR ile bulundu ve işaretlendi.","{0} found with OCR and marked."],
+ocrFail:["OCR tamamlanamadı — Sayfa {0}/{1}","OCR failed — Page {0}/{1}"],
+ocrFailt:["{0} — OCR tamamlanamadı; doğru sayfa açık.","{0} — OCR failed; the correct page is open."],
+pdfOnly:["Bu sürümde PDF seç.","Please choose a PDF file.","Bitte eine PDF-Datei wählen.","Elige un archivo PDF.","Выберите файл PDF."],
+connErr:["Bağlantı Hatası","Connection Error","Verbindungsfehler","Error de conexión","Ошибка соединения"],
+connErrB:["PDF analiz motoruna internet üzerinden ulaşılamadı. Chrome/Edge internet erişimini kontrol et ve tekrar dene.","The PDF engine could not be reached over the internet. Check your connection and try again."],
+prep:["Analiz hazırlanıyor","Preparing analysis","Analyse wird vorbereitet","Preparando análisis","Подготовка анализа"],
+analyzing:["ANALİZ EDİLİYOR — Sayfa {0}/{1}","ANALYSING — Page {0}/{1}","ANALYSE — Seite {0}/{1}","ANALIZANDO — Página {0}/{1}","АНАЛИЗ — страница {0}/{1}"],
+done:["TAMAMLANDI — {0} sayfa • {1} devre elemanı • {2} ekipman/başlık","DONE — {0} pages • {1} circuit elements • {2} equipment/titles","FERTIG — {0} Seiten • {1} Schaltelemente • {2} Ausrüstungen","LISTO — {0} páginas • {1} elementos • {2} equipos/títulos","ГОТОВО — страниц: {0} • элементов: {1} • оборудования: {2}"],
+doneT:["Analiz tamamlandı","Analysis complete","Analyse abgeschlossen","Análisis completado","Анализ завершён"],
+pdfFail:["PDF açılamadı","The PDF could not be opened","PDF konnte nicht geöffnet werden","No se pudo abrir el PDF","Не удалось открыть PDF"],
+elCnt:["{0} eleman bulundu","{0} elements found","{0} Elemente gefunden","{0} elementos encontrados","Найдено элементов: {0}"],
+eqCnt:["{0} ekipman/başlık bulundu","{0} equipment/titles found","{0} Ausrüstungen gefunden","{0} equipos encontrados","Найдено оборудования: {0}"],
+pgs:["Sayfa","Pages","Seiten","Páginas","Страницы"],
+emptyEl:["Metin katmanında elektrik referansı bulunamadı.","No electrical references found in the text layer."],
+emptyEq:["Metin katmanında ekipman adı bulunamadı.","No equipment names found in the text layer."],
+cls:["Sınıf:","Class:","Klasse:","Clase:","Класс:"],
+foundp:["Bulunduğu sayfalar:","Found on pages:","Gefunden auf Seiten:","Encontrado en páginas:","Найдено на страницах:"],
+libEmpty:["Kütüphane boş.","The library is empty.","Die Bibliothek ist leer.","La biblioteca está vacía.","Библиотека пуста."],
+del:["Sil","Delete","Löschen","Eliminar","Удалить"],
+askName:["Kullanılacak ad:","Name to use:","Zu verwendender Name:","Nombre a usar:","Используемое имя:"],
+notStored:["Dosya bu tarayıcıda saklı değil — tekrar yükle","File is not stored in this browser — upload it again"],
+zoom:["Yakınlaştırma %{0}","Zoom {0}%","Zoom {0} %","Zoom {0} %","Масштаб {0}%"],
+needAn:["Önce bir PDF analiz et","Analyse a PDF first","Zuerst eine PDF analysieren","Analiza primero un PDF","Сначала проанализируйте PDF"],
+cycle:["Sayfa {0} ({1}/{2}) — tekrar tıkla: sonraki","Page {0} ({1}/{2}) — click again for next"],
+faultL:["Arıza:","Fault:","Störung:","Avería:","Неисправность:"],
+faultT:["Arıza Analizi","Fault Analysis","Störungsanalyse","Análisis de averías","Анализ неисправности"],
+faultT2:["Arıza Analizi — Fault Engine","Fault Analysis — Fault Engine","Störungsanalyse — Fault Engine","Análisis de averías — Fault Engine","Анализ неисправности — Fault Engine"],
+needPdf:["Şemada ilgili sayfaları bulmak için önce bir PDF yükleyip analizini tamamla.","To find the relevant schematic pages, upload and analyse a PDF first.","Um die passenden Schaltplanseiten zu finden, zuerst eine PDF hochladen und analysieren.","Para encontrar las páginas relevantes, sube y analiza primero un PDF.","Чтобы найти нужные страницы схемы, сначала загрузите и проанализируйте PDF."],
+noMatch:["PDF metin katmanında bu arızayla eşleşen ifade bulunamadı. Terimi şemadaki ekipman adı veya referansıyla tekrar dene.","No text in the PDF matches this fault. Try again using the equipment name or reference as written in the schematic."],
+relPages:["Şemadaki metin, ekipman ve devre referanslarına göre en ilgili sayfalar:","Most relevant pages based on schematic text, equipment and circuit references:","Relevanteste Seiten nach Schaltplantext, Ausrüstung und Referenzen:","Páginas más relevantes según texto, equipos y referencias del esquema:","Наиболее подходящие страницы по тексту, оборудованию и обозначениям схемы:"],
+safety:["Sonuçlar şema metni ve referans eşleşmelerine dayanır. Enerjili elektrik sisteminde işlem yapmadan önce güvenli izolasyon/LOTO prosedürünü uygula.","Results are based on schematic text and reference matches. Before working on an energised electrical system, apply safe isolation / LOTO procedures.","Die Ergebnisse beruhen auf Schaltplantext und Referenztreffern. Vor Arbeiten an spannungsführenden Anlagen sichere Freischaltung/LOTO anwenden.","Los resultados se basan en el texto y las referencias del esquema. Antes de intervenir en un sistema con tensión, aplica aislamiento seguro / LOTO.","Результаты основаны на тексте и обозначениях схемы. Перед работой с системой под напряжением выполните безопасное отключение / LOTO."],
+defFault:["Belirtilen arıza","Reported fault","Gemeldete Störung","Avería indicada","Указанная неисправность"],
+chkFuse:["{0} {1}: besleme/atmış durumunu kontrol et","{0} {1}: check supply / tripped state"],
+chkRelay:["{0} {1}: bobin/kontak gerilimini kontrol et","{0} {1}: check coil / contact voltage"],
+chkMotor:["{0} Motor: çıkış gerilimi ve bağlantıyı kontrol et","{0} Motor: check output voltage and connection"],
+chkTerm:["{0} Terminal: bağlantı/süreklilik kontrolü","{0} Terminal: check connection / continuity"],
+chkRefs:["İlgili referanslar: {0}","Related references: {0}"],
+chkChain:["Bu sayfadaki besleme, kumanda ve çıkış zincirini kontrol et","Check the supply, control and output chain on this page"],
+matchL:["eşleşme","matches","Treffer","coincidencias","совпадения"],
+kbList:["{0} — kontrol listesi","{0} — checklist","{0} — Checkliste","{0} — lista de comprobación","{0} — чек-лист"],
+kbSym:["Belirtiye göre","By symptom","Nach Symptom","Según el síntoma","По симптому"]
+};
+const I={};Object.keys(LANGS).forEach((l,i)=>{I[l]={};for(const k in D)if(D[k][i]!==undefined)I[l][k]=D[k][i]});
+function t(k,...a){let s=(I[LANG]&&I[LANG][k])||I.en[k]||I.tr[k]||k;return s.replace(/\{(\d)\}/g,(m,i)=>a[i])}
+const TYPE_EN={"Sigorta":"Fuse","Şalter/Kesici":"Switch/Breaker","Kesici":"Breaker","Röle":"Relay","Kontaktör":"Contactor","Zaman Rölesi":"Timer relay","Motor":"Motor","Anahtar/Sensör":"Switch/Sensor","Sensör":"Sensor","Terminal/Klemens":"Terminal","Direnç":"Resistor","Kondansatör":"Capacitor","Diyot":"Diode","Lamba/Gösterge":"Lamp/Indicator","Trafo":"Transformer","Güç Kaynağı":"Power supply","Devre Kesici":"Circuit breaker","PLC":"PLC","Devre Elemanı":"Circuit element"};
+function typeLabel(x){return LANG==="tr"?x:(TYPE_EN[x]||x)}
+let PDFJS=null,total=0,currentElements=[],currentEquipment=[],pageTexts=[],pageTextItems=[],pageViewports=[],OCR=null,ocrLoading=null,nm=(()=>{try{return localStorage.aheName}catch(e){}})()||(LANG==="tr"?"Çarkçım":"");
+
+const cdns=[
+ ["https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js","https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"],
+ ["https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js","https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"],
+ ["https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js","https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js"]
+];
+function loadScript(src){return new Promise((ok,bad)=>{let s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=bad;document.head.appendChild(s)})}
+async function initPDF(){for(let i=0;i<cdns.length;i++){try{$("status").textContent=t("conn",i+1);await loadScript(cdns[i][0]);if(window.pdfjsLib){PDFJS=window.pdfjsLib;try{PDFJS.GlobalWorkerOptions.workerSrc=URL.createObjectURL(new Blob([`importScripts("${cdns[i][1]}");`],{type:"text/javascript"}))}catch(e){PDFJS.GlobalWorkerOptions.workerSrc=cdns[i][1]}$("status").textContent=t("ready");return true}}catch(e){}}$("status").textContent=t("nocdn");return false}
+initPDF();
+const ocrCdns=[
+ "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js",
+ "https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"
+];
+async function initOCR(){
+ if(window.Tesseract){OCR=window.Tesseract;return true}
+ if(ocrLoading)return ocrLoading;
+ ocrLoading=(async()=>{for(let src of ocrCdns){try{await loadScript(src);if(window.Tesseract){OCR=window.Tesseract;return true}}catch(e){}}return false})();
+ return ocrLoading;
+}
+
+function toast(s){$("toast").textContent=s;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",1800)}
+function show(t,b){$("mt").textContent=t;$("mb").innerHTML=b;$("modal").style.display="block";$("modal").style.left=Math.max(10,innerWidth/2-195)+"px";$("modal").style.top=Math.max(120,innerHeight/2-170)+"px"} $("mx").onclick=()=>$("modal").style.display="none";
+const typeMap={F:"Sigorta",FU:"Sigorta",Q:"Şalter/Kesici",QF:"Kesici",K:"Röle",KA:"Röle",KM:"Kontaktör",KT:"Zaman Rölesi",M:"Motor",S:"Anahtar/Sensör",B:"Sensör",X:"Terminal/Klemens",R:"Direnç",C:"Kondansatör",D:"Diyot",H:"Lamba/Gösterge",T:"Trafo",PS:"Güç Kaynağı",CB:"Devre Kesici",PLC:"PLC"};
+const refRe=/\b(FU|QF|KM|KA|KT|PLC|CB|PS|F|Q|K|M|S|B|X|R|C|D|H|T)[-_ ]?\d{1,4}[A-Z]?(?:[.:/-]\d{1,4}[A-Z]?)?\b/gi;
+const equipmentRules=[
+ ["Generator",/\b(generator|genset|jenerat[oö]r)\b/i],["Main Engine",/\b(main engine|ana makine|main motor)\b/i],["Pump",/\b(pump|pompa)\b/i],["Fan",/\b(fan|blower|extract fan)\b/i],["Compressor",/\b(compressor|kompres[oö]r)\b/i],["Battery Charger",/\b(battery charger|ak[uü] şarj|charger)\b/i],["Battery",/\b(battery|ak[uü])\b/i],["Bow Thruster",/\b(bow thruster|ba[sş] pervane)\b/i],["Stern Thruster",/\b(stern thruster)\b/i],["Steering",/\b(steering|rudder|d[uü]men)\b/i],["Fire Pump",/\b(fire pump|yangın pompa)\b/i],["Bilge Pump",/\b(bilge pump|sintine pompa)\b/i],["Watermaker",/\b(watermaker|reverse osmosis)\b/i],["Air Conditioning",/\b(air conditioning|a\/c|chiller|frigomar)\b/i],["Fuel System",/\b(fuel transfer|fuel pump|yakıt)\b/i],["PLC",/\bPLC\b/i],["Distribution Panel",/\b(distribution panel|switchboard|MDB|MSB|panel)\b/i],["Inverter",/\b(inverter)\b/i],["Transformer",/\b(transformer|trafo)\b/i],["Shore Power",/\b(shore power|sahil besleme)\b/i]
+];
+function normalizeRef(x){return x.toUpperCase().replace(/\s+/g,"").replace(/_/g,"-")}
+function refType(r){let p=(r.match(/^[A-Z]+/)||["?"])[0];return typeMap[p]||"Devre Elemanı"}
+function analyzePage(text,page,emap,qmap){let refs=text.match(refRe)||[];refs.forEach(raw=>{let r=normalizeRef(raw);if(!emap.has(r))emap.set(r,{ref:r,type:refType(r),pages:new Set});emap.get(r).pages.add(page)});
+let lines=text.split(/\s{2,}|\n/).map(x=>x.trim()).filter(x=>x.length>2&&x.length<100);
+equipmentRules.forEach(([kind,re])=>{if(re.test(text)){let candidates=lines.filter(l=>re.test(l)).slice(0,5);if(!candidates.length)candidates=[kind];candidates.forEach(c=>{let name=c.replace(/\s+/g," ").trim();if(name.length>70)name=kind;if(!qmap.has(name))qmap.set(name,{name,kind,pages:new Set});qmap.get(name).pages.add(page)})}})}
+function renderResults(emap,qmap){currentElements=[...emap.values()].sort((a,b)=>a.ref.localeCompare(b.ref,undefined,{numeric:true}));currentEquipment=[...qmap.values()].sort((a,b)=>a.name.localeCompare(b.name));
+$("elCount").textContent=t("elCnt",currentElements.length);$("eqCount").textContent=t("eqCnt",currentEquipment.length);
+$("elements").innerHTML=currentElements.length?currentElements.map((e,i)=>`<div class="item" data-e="${i}"><b>${e.ref}</b> — ${typeLabel(e.type)}<br><small>${t("pgs")}: ${[...e.pages].join(", ")}</small></div>`).join(""):`<div class="count">${t("emptyEl")}</div>`;
+$("equipment").innerHTML=currentEquipment.length?currentEquipment.map((e,i)=>`<div class="item" data-q="${i}"><b>${esc(e.name)}</b><br><small>${e.kind} • ${t("pgs")}: ${[...e.pages].join(", ")}</small></div>`).join(""):`<div class="count">${t("emptyEq")}</div>`;
+document.querySelectorAll("[data-e]").forEach(x=>x.onclick=()=>{let e=currentElements[+x.dataset.e],pg=[...e.pages];e.idx=((e.idx??-1)+1)%pg.length;let p=pg[e.idx];if(pg.length>1)toast(t("cycle",p,e.idx+1,pg.length));highlightRef(e.ref,p);document.querySelectorAll("[data-e]").forEach(y=>y.classList.remove("active"));x.classList.add("active")});
+document.querySelectorAll("[data-q]").forEach(x=>x.onclick=()=>{let e=currentEquipment[+x.dataset.q];jump([...e.pages][0]);show(e.name,`<b>${t("cls")}</b> ${e.kind}<br><b>${t("foundp")}</b> ${[...e.pages].join(", ")}`)})}
+function esc(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
+function highlightRef(ref,p){
+ const card=document.querySelector(`.page[data-page="${p}"]`); if(!card)return;
+ $("modal").style.display="none"; document.querySelectorAll(".refMark").forEach(m=>m.remove());
+ const items=pageTextItems[p]||[],vp=pageViewports[p],canvas=card.querySelector("canvas"),layer=card.querySelector(".markLayer");
+ if(!vp||!canvas||!layer)return;
+ const target=normalizeRef(ref), compact=x=>normalizeRef(x||"").replace(/[^A-Z0-9]/g,"");
+ const targetCompact=compact(ref); let groups=[];
+
+ // Exact item
+ items.forEach(it=>{if(normalizeRef(it.str||"")===target)groups.push([it])});
+
+ // Sequential fragmented items (K5 + . + 23, etc.)
+ if(!groups.length){
+  for(let i=0;i<items.length;i++){
+   let grp=[],joined="";
+   for(let j=i;j<Math.min(items.length,i+10);j++){
+    let z=compact(items[j].str); if(!z)continue;
+    grp.push(items[j]); joined+=z;
+    if(joined===targetCompact){groups.push([...grp]);break}
+    if(joined.length>targetCompact.length+4)break;
+   }
+  }
+ }
+
+ // Geometry-aware search: join nearby text fragments regardless of PDF storage order.
+ if(!groups.length){
+   const geom=items.map((it,i)=>{
+     const tr=PDFJS.Util.transform(vp.transform,it.transform);
+     return {it,i,x:tr[4],y:tr[5],txt:compact(it.str)};
+   }).filter(o=>o.txt);
+   for(const a of geom){
+     const candidates=[
+       geom.filter(b=>Math.abs(b.y-a.y)<24 && Math.abs(b.x-a.x)<220).sort((u,v)=>u.x-v.x),
+       geom.filter(b=>Math.abs(b.x-a.x)<24 && Math.abs(b.y-a.y)<220).sort((u,v)=>v.y-u.y)
+     ];
+     for(const near of candidates){
+       for(let i=0;i<near.length;i++){
+         let joined="",grp=[];
+         for(let j=i;j<Math.min(near.length,i+10);j++){
+           joined+=near[j].txt;grp.push(near[j].it);
+           if(joined===targetCompact){groups.push([...grp]);break}
+           if(joined.length>targetCompact.length+5)break;
+         }
+         if(groups.length)break;
+       }
+       if(groups.length)break;
+     }
+     if(groups.length)break;
+   }
+ }
+
+ // Embedded / punctuation-insensitive item
+ if(!groups.length)items.forEach(it=>{let z=compact(it.str);if(z&&z.includes(targetCompact))groups.push([it])});
+
+ if(!groups.length){
+   card.scrollIntoView({behavior:"smooth",block:"center"}); $("badge").textContent=t("page",p,total);
+   toast(t("ocrNoPos",ref));
+   ocrHighlight(ref,p,canvas,layer);
+   return;
+ }
+
+ const sx=canvas.clientWidth/canvas.width,sy=canvas.clientHeight/canvas.height;let marks=[];
+ groups.slice(0,12).forEach(grp=>{
+  let boxes=grp.map(it=>{const tr=PDFJS.Util.transform(vp.transform,it.transform),fs=Math.max(Math.hypot(tr[2],tr[3]),8);
+   const x=tr[4]*sx,base=(canvas.height-tr[5])*sy,w=Math.max((it.width||10)*vp.scale*sx,8),h=Math.max(fs*sy,12);
+   return {l:x,t:base-h*1.15,r:x+w,b:base+h*.28};});
+  let l=Math.min(...boxes.map(b=>b.l)),t=Math.min(...boxes.map(b=>b.t)),r=Math.max(...boxes.map(b=>b.r)),b=Math.max(...boxes.map(b=>b.b));
+  // Expand around the reference so the nearby electrical symbol is visible too.
+  let px=Math.max(12,(r-l)*.55),py=Math.max(10,(b-t)*.9),m=document.createElement("div");m.className="refMark";
+  m.style.left=Math.max(0,l-px)+"px";m.style.top=Math.max(0,t-py)+"px";
+  m.style.width=Math.min(canvas.clientWidth-Math.max(0,l-px),(r-l)+2*px)+"px";m.style.height=((b-t)+2*py)+"px";
+  layer.appendChild(m);marks.push(m);
+ });
+ setTimeout(()=>{marks[0]?.scrollIntoView({behavior:"smooth",block:"center",inline:"center"});$("badge").textContent=t("page",p,total)},150);
+ setTimeout(()=>$("badge").textContent=t("page",p,total),700);
+ toast(t("marked",ref,p)+(marks.length>1?t("matches",marks.length):""));
+}
+async function ocrHighlight(ref,p,canvas,layer){
+ let hi=null;
+ try{
+  const ok=await initOCR();
+  if(!ok){toast(t("ocrNo",ref));return}
+  $("status").textContent=t("ocrPrep",ref,p,total);
+
+  // Re-render the PDF page at high resolution only for OCR.
+  // This is independent of the smaller on-screen canvas.
+  const srcItems=pageTextItems[p]||[];
+  const scaleFactor=3.6;
+  // Reuse current PDF viewport geometry to create a high-res copy of the displayed page.
+  const baseVp=pageViewports[p];
+  const hiScale=scaleFactor;
+  hi=document.createElement("canvas");
+  hi.width=Math.round(canvas.width*hiScale);
+  hi.height=Math.round(canvas.height*hiScale);
+  const hctx=hi.getContext("2d",{willReadFrequently:true});
+  hctx.imageSmoothingEnabled=true;
+  hctx.imageSmoothingQuality="high";
+  hctx.drawImage(canvas,0,0,hi.width,hi.height);
+
+  // Increase local contrast for thin schematic lettering.
+  try{
+   let im=hctx.getImageData(0,0,hi.width,hi.height),d=im.data;
+   for(let i=0;i<d.length;i+=4){
+    let g=.299*d[i]+.587*d[i+1]+.114*d[i+2];
+    let v=g<205?Math.max(0,(g-128)*1.45+128):Math.min(255,(g-128)*1.18+128);
+    d[i]=d[i+1]=d[i+2]=v;
+   }
+   hctx.putImageData(im,0,0);
+  }catch(e){}
+
+  const compact=t=>normalizeRef(t||"").replace(/[^A-Z0-9]/g,"");
+  const target=compact(ref);
+  const variants=new Set([target]);
+  // Common OCR confusions in electrical references.
+  variants.add(target.replace(/O/g,"0")); variants.add(target.replace(/0/g,"O"));
+  variants.add(target.replace(/I/g,"1")); variants.add(target.replace(/1/g,"I"));
+  variants.add(target.replace(/S/g,"5")); variants.add(target.replace(/5/g,"S"));
+
+  const result=await OCR.recognize(hi,"eng",{
+   logger:m=>{if(m.status==="recognizing text"&&typeof m.progress==="number")
+    $("status").textContent=t("ocrProg",ref,Math.round(m.progress*100));}
+  });
+
+  const words=(result.data&&result.data.words)||[];
+  let candidates=[];
+  function scoreText(txt){
+   let z=compact(txt); if(!z)return 0;
+   if(variants.has(z))return 100;
+   if(z.includes(target)||target.includes(z))return 82;
+   // one-character tolerant comparison
+   if(Math.abs(z.length-target.length)<=1){
+    let a=z,b=target,n=Math.min(a.length,b.length),diff=Math.abs(a.length-b.length);
+    for(let i=0;i<n;i++)if(a[i]!==b[i])diff++;
+    if(diff<=1)return 70;
+   }
+   return 0;
+  }
+  words.forEach((w,i)=>{
+   let sc=scoreText(w.text);if(sc)candidates.push({words:[w],score:sc+(w.confidence||0)/10});
+   let joined="",grp=[];
+   for(let j=i;j<Math.min(words.length,i+6);j++){
+    let z=compact(words[j].text);if(!z)continue;joined+=z;grp.push(words[j]);
+    let js=scoreText(joined);
+    if(js)candidates.push({words:[...grp],score:js+grp.reduce((a,b)=>a+(b.confidence||0),0)/(10*grp.length)});
+    if(joined.length>target.length+3)break;
+   }
+  });
+  candidates.sort((a,b)=>b.score-a.score);
+  if(!candidates.length){
+   $("status").textContent=t("ocrNF",ref);
+   toast(t("ocrNFt",ref,p));
+   return;
+  }
+
+  document.querySelectorAll(".refMark").forEach(m=>m.remove());
+  const c=candidates[0],boxes=c.words.map(w=>w.bbox);
+  let l=Math.min(...boxes.map(b=>b.x0))/hiScale,t=Math.min(...boxes.map(b=>b.y0))/hiScale,
+      r=Math.max(...boxes.map(b=>b.x1))/hiScale,b=Math.max(...boxes.map(b=>b.y1))/hiScale;
+  const sx=canvas.clientWidth/canvas.width,sy=canvas.clientHeight/canvas.height;
+  l*=sx;r*=sx;t*=sy;b*=sy;
+  let px=Math.max(15,(r-l)*.9),py=Math.max(13,(b-t)*1.5);
+  let mark=document.createElement("div");mark.className="refMark";
+  mark.style.left=Math.max(0,l-px)+"px";mark.style.top=Math.max(0,t-py)+"px";
+  mark.style.width=Math.min(canvas.clientWidth-Math.max(0,l-px),(r-l)+2*px)+"px";
+  mark.style.height=((b-t)+2*py)+"px";layer.appendChild(mark);
+  setTimeout(()=>mark.scrollIntoView({behavior:"smooth",block:"center",inline:"center"}),120);
+  $("badge").textContent=t("page",p,total);
+  $("status").textContent=t("ocrOK",ref,p,total);
+  toast(t("ocrOKt",ref));
+ }catch(err){
+  $("status").textContent=t("ocrFail",p,total);
+  toast(t("ocrFailt",ref));
+ }finally{hi=null}
+}
+function jump(n){document.querySelector(`.page[data-page="${n}"]`)?.scrollIntoView({behavior:"smooth",block:"start"});$("modal").style.display="none"}
+async function handle(files){if(!files.length)return;let f=files[0];if(!f.name.toLowerCase().endsWith(".pdf")){toast(t("pdfOnly"));return}if(!PDFJS){let ok=await initPDF();if(!ok){show(t("connErr"),`<div class="warn">${t("connErrB")}</div>`);return}
+}
+saveMeta(f);$("drop").style.display="none";$("title").textContent=f.name.replace(/\.pdf$/i,"").replace(/[_-]+/g," ");$("pages").innerHTML="";$("elements").innerHTML="";$("equipment").innerHTML="";$("elCount").textContent=t("prep");$("eqCount").textContent=t("prep");$("bar").style.width="1%";
+try{let data=new Uint8Array(await f.arrayBuffer()),pdf=await PDFJS.getDocument({data}).promise;total=pdf.numPages;$("badge").textContent=t("page",1,total);let emap=new Map(),qmap=new Map(); pageTexts=[]; pageTextItems=[]; pageViewports=[];
+for(let n=1;n<=total;n++){$("status").textContent=t("analyzing",n,total);let pg=await pdf.getPage(n),tc=await pg.getTextContent(),text=tc.items.map(x=>x.str).join(" ");pageTexts[n]=text;pageTextItems[n]=tc.items;analyzePage(text,n,emap,qmap);
+let vp=pg.getViewport({scale:1.35});pageViewports[n]=vp;let card=document.createElement("section");card.className="page";card.dataset.page=n;card.innerHTML=`<div class="ph"><span>${t("pageN",n)}</span><span>${n}/${total}</span></div>`;let c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;let wrap=document.createElement("div");wrap.className="canvasWrap";wrap.appendChild(c);let ml=document.createElement("div");ml.className="markLayer";wrap.appendChild(ml);card.appendChild(wrap);$("pages").appendChild(card);await pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;$("bar").style.width=(n/total*100)+"%";renderResults(emap,qmap)}
+$("status").textContent=t("done",total,emap.size,qmap.size);$("bar").style.width="100%";observe();toast(t("doneT"));
+}catch(e){$("status").textContent=t("pdfFail");$("pages").innerHTML=`<div class="empty"><b>${t("pdfFail")}</b><br><br>${esc(String(e.message||e))}</div>`}}
+function observe(){let obs=new IntersectionObserver(es=>{let v=es.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(v)$("badge").textContent=t("page",v.target.dataset.page,total)},{root:$("center"),threshold:[.1,.3,.5]});document.querySelectorAll(".page").forEach(p=>obs.observe(p))}
+$("newFile").onclick=$("newFile2").onclick=()=>$("picker").click();$("picker").onchange=e=>handle(e.target.files);$("drop").ondragover=e=>{e.preventDefault();$("drop").classList.add("over")};$("drop").ondragleave=()=>$("drop").classList.remove("over");$("drop").ondrop=e=>{e.preventDefault();$("drop").classList.remove("over");handle(e.dataTransfer.files)};
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");$("eq").style.display=t.dataset.tab==="eq"?"block":"none";$("lib").style.display=t.dataset.tab==="lib"?"block":"none"});
+function saveMeta(f){dbPut(f.name,f);let a=getLib().filter(x=>x.name!==f.name);a.unshift({name:f.name,size:f.size,time:Date.now()});localStorage.aheLib=JSON.stringify(a);renderLib()}
+function renderLib(){let a=getLib();$("library").innerHTML=a.length?a.map((f,i)=>`<div class="item librow"><span style="cursor:pointer" title="Aç" onclick="openLib(${i})">${esc(f.name)}</span><button class="mini" onclick="delLib(${i})">${t("del")}</button></div>`).join(""):`<div class="count">${t("libEmpty")}</div>`}window.delLib=i=>{let a=getLib();dbDel(a[i].name);a.splice(i,1);localStorage.aheLib=JSON.stringify(a);renderLib()};renderLib();
+$("nameBtn").onclick=()=>{let n=prompt(t("askName"),nm);if(n){nm=n;localStorage.aheName=n;applyGreet()}};
+
+function faultTokens(q){
+ const stop=new Set(["çalışmıyor","calismiyor","çalışmiyor","almıyor","almiyor","yok","arıza","ariza","the","is","not","no","does","work","working"]);
+ return q.toLowerCase().replace(/[^\p{L}\p{N}._/-]+/gu," ").split(/\s+/).filter(x=>x.length>2&&!stop.has(x));
+}
+function refsOnPage(p){return currentElements.filter(e=>e.pages.has(p))}
+function equipmentOnPage(p){return currentEquipment.filter(e=>e.pages.has(p))}
+function runFault(q){
+ if(!pageTexts.length){show(t("faultT"),`<b>${t("faultL")}</b> ${esc(q)}${kbHtml(matchKB(q))}<div class="warn">${t("needPdf")}</div>`);return}
+ let toks=faultTokens(q); if(!toks.length)toks=q.toLowerCase().split(/\s+/).filter(Boolean);
+ let scored=[];const kbm=matchKB(q),kbKw=kbm.kw;
+ for(let p=1;p<=total;p++){
+   let txt=(pageTexts[p]||"").toLowerCase(),score=0,hits=[];
+   toks.forEach(t=>{if(txt.includes(t)){score+=3;hits.push(t)}});
+   // phrase and domain expansion
+   let phrase=q.toLowerCase().replace(/çalışmıyor|calismiyor|çalışmiyor|almıyor|almiyor/g,"").trim();
+   if(phrase && txt.includes(phrase)){score+=8}
+   let expansions=kbKw;
+   expansions.forEach(t=>{if(txt.includes(t)){score+=1;hits.push(t)}});
+   if(score>0)scored.push({p,score,hits:[...new Set(hits)]});
+ }
+ scored.sort((a,b)=>b.score-a.score);
+ let top=scored.slice(0,8);
+ if(!top.length){show(t("faultT"),`<b>${t("faultL")}</b> ${esc(q)}${kbHtml(kbm)}<br><div class="warn">${t("noMatch")}</div>`);return}
+ let rows=top.map((r,idx)=>{
+   let refs=refsOnPage(r.p).slice(0,10), eqs=equipmentOnPage(r.p).slice(0,3);
+   let checks=[];
+   let fuse=refs.find(x=>/Sigorta|Kesici|Şalter/.test(x.type)); if(fuse)checks.push(t("chkFuse",fuse.ref,typeLabel(fuse.type)));
+   let relay=refs.find(x=>/Röle|Kontaktör/.test(x.type)); if(relay)checks.push(t("chkRelay",relay.ref,typeLabel(relay.type)));
+   let motor=refs.find(x=>/Motor/.test(x.type)); if(motor)checks.push(t("chkMotor",motor.ref));
+   let term=refs.find(x=>/Terminal/.test(x.type)); if(term)checks.push(t("chkTerm",term.ref));
+   if(!checks.length && refs.length)checks.push(t("chkRefs",refs.slice(0,5).map(x=>x.ref).join(", ")));
+   if(!checks.length)checks.push(t("chkChain"));
+   return `<div class="cause" onclick="jump(${r.p})"><b>${idx+1}. ${t("pageW",r.p)}</b> — ${t("matchL")}: ${r.hits.slice(0,6).map(esc).join(", ")}<br><small>${eqs.map(x=>esc(x.name)).join(" • ")}</small><br>${checks.map(esc).join("<br>")}</div>`;
+ }).join("");
+ show(t("faultT2"),`<b>${t("faultL")}</b> ${esc(q)}<br>${kbHtml(kbm)}<small>${t("relPages")}</small>${rows}<div class="warn">${t("safety")}</div>`);
+}
+$("fault").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();runFault(e.target.value||t("defFault"))}};
+
+let dr=false,dx=0,dy=0;$("mh").onmousedown=e=>{dr=true;dx=e.clientX-$("modal").offsetLeft;dy=e.clientY-$("modal").offsetTop};document.onmousemove=e=>{if(dr){$("modal").style.left=Math.max(0,e.clientX-dx)+"px";$("modal").style.top=Math.max(0,e.clientY-dy)+"px"}};document.onmouseup=()=>dr=false;
+
+/* ---- Eklentiler ---- */
+let _db=null;function idb(){return _db||(_db=new Promise((ok,bad)=>{try{let r=indexedDB.open("aheaseLib",1);r.onupgradeneeded=()=>r.result.createObjectStore("f");r.onsuccess=()=>ok(r.result);r.onerror=()=>bad(r.error)}catch(e){bad(e)}}))}
+async function dbPut(k,v){try{let d=await idb();d.transaction("f","readwrite").objectStore("f").put(v,k)}catch(e){}}
+async function dbDel(k){try{let d=await idb();d.transaction("f","readwrite").objectStore("f").delete(k)}catch(e){}}
+async function dbGet(k){try{let d=await idb();return await new Promise(ok=>{let r=d.transaction("f").objectStore("f").get(k);r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)})}catch(e){return null}}
+window.openLib=async i=>{let f=getLib()[i];if(!f)return;let b=await dbGet(f.name);if(!b){toast(t("notStored"));return}handle([new File([b],f.name,{type:"application/pdf"})])};
+let Z=1;function applyZoom(){let pg=$("pages");pg.classList.toggle("zoomed",Z!==1);document.querySelectorAll(".page canvas").forEach(c=>c.style.width=Z===1?"":Math.round(c.width*Z)+"px");toast(t("zoom",Math.round(Z*100)))}
+$("zi").onclick=()=>{Z=Math.min(3,Z+.25);applyZoom()};$("zo").onclick=()=>{Z=Math.max(.5,Z-.25);applyZoom()};
+$("elSearch").oninput=e=>{let q=e.target.value.toLowerCase().replace(/[\s_-]/g,"");document.querySelectorAll("#elements .item").forEach(x=>x.style.display=x.textContent.toLowerCase().replace(/[\s_-]/g,"").includes(q)?"":"none")};
+$("csvBtn").onclick=()=>{if(!currentElements.length){toast(t("needAn"));return}let rows=[["Referans","Tür","Sayfalar"],...currentElements.map(e=>[e.ref,typeLabel(e.type),[...e.pages].join(" ")])];let csv="\ufeff"+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(";")).join("\n");let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="devre-elemanlari.csv";a.click()};
+document.querySelector(".right").id="rightPanel";$("panelBtn").onclick=()=>$("rightPanel").classList.toggle("open");
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){$("modal").style.display="none";$("rightPanel").classList.remove("open")}});
+/* ---- Arıza bilgi tabanı: ekipmana özel kontrol listeleri ---- */
+const KB=[
+{name:"Jeneratör",re:/jenerat|gener[ao][dt]|genset|генератор/i,kw:["generator","genset","start","stop","fuel","solenoid","emergency","oil pressure","alternator"],checks:["Start aküsü gerilimi ve kutup başı bağlantılarını ölç (24V/12V)","Acil stop butonlarının ve kumanda panosundaki alarm/ortak arıza lambasının durumuna bak","Yakıt vanaları ile yakıt/stop solenoid beslemesini kontrol et","Start sigortası, start rölesi/kontaktörü bobin gerilimini ölç","Yağ basıncı, soğutma suyu sıcaklığı ve seviye sensörlerinin (shutdown devresi) kapalı olduğunu doğrula","Şarj alternatörü / uyarma (D+) devresini kontrol et","Çalıştıktan sonra ana şalter (breaker), çıkış gerilimi ve faz sırasını doğrula"]},
+{name:"Pompa",re:/pomp|pump|bomba|насос/i,kw:["pump","motor","relay","contactor","breaker","overload","float","pressure switch"],checks:["Besleme sigortası/kesicinin atıp atmadığına bak","Termik röle (overload) trip durumunu kontrol et, reset et","Kontaktör bobin gerilimi ve kontak çıkışını ölç","Şamandıra/basınç şalteri/seviye anahtarı ve MAN-OFF-AUTO anahtarı konumunu kontrol et","Motor sargı direnci ve izolasyonu (megger), faz dengesini ölç","Dönüş yönünü ve pompanın havalanmasını (prime) kontrol et"]},
+{name:"Fan / Havalandırma",re:/\bfan\b|blower|vantilat|havaland|l[uü]fter|ventilad|вентилятор/i,kw:["fan","blower","motor","damper","contactor","breaker"],checks:["Besleme sigortası ve termik koruma durumunu kontrol et","Kontaktör/yıldız-üçgen rölesi bobin gerilimini ölç","Damper/klap limit anahtarlarının açık sinyali (interlock) verdiğini doğrula","Dönüş yönü, pervane/kayış ve rulman serbestliğini kontrol et"]},
+{name:"Kompresör",re:/kompres|compressor/i,kw:["compressor","pressure switch","unloader","contactor","overload","oil"],checks:["Basınç şalteri ayarını ve kontağını kontrol et","Termik röle ve kontaktör durumunu doğrula","Unloader/drenaj valfi solenoid beslemesini ölç","Yağ seviyesi ve düşük yağ koruma sinyalini kontrol et","Motor besleme fazlarını ve gerilim dengesini ölç"]},
+{name:"Pruva/Kıç Pervane (Thruster)",re:/thruster|pervane|bow\b/i,kw:["thruster","bow","stern","contactor","solenoid","joystick","battery","breaker"],checks:["Thruster ana şalteri/izolatörü ve ana sigortanın (yüksek akım) durumunu kontrol et","Akü gerilimini yük altında ölç (gerilim düşümü, kablo ısınması)","Yön kontaktörleri/solenoid bobin gerilimini kontrol et","Joystick/kumanda panosu besleme ve sinyalini doğrula","Termik koruma ve aşırı sıcaklık trip durumuna bak","Hidrolik ise yağ seviyesi ve pompa besleme devresini kontrol et"]},
+{name:"Dümen Sistemi",re:/steering|d[uü]men|rudder/i,kw:["steering","rudder","solenoid","pump","feedback","autopilot","hydraulic"],checks:["Dümen pompa motoru besleme sigortası ve kontaktörünü kontrol et","Yön solenoid valflerinin bobin gerilimini ölç","Rudder referans/feedback birimi sinyalini ve bağlantısını doğrula","Otopilot/kumanda ünitesi beslemesini kontrol et","Hidrolik yağ seviyesini ve kaçak olup olmadığını kontrol et"]},
+{name:"Akü / Şarj / İnverter",re:/ak[uü]|şarj|sarj|charger|battery|inverter/i,kw:["battery","charger","inverter","dc","fuse","isolator"],checks:["Akü terminal gerilimlerini ve bağlantı sıkılığını ölç","DC ana sigorta ve akü izolatörünü kontrol et","Şarj cihazı AC giriş gerilimi ile DC çıkışını ölç","Sıcaklık sensörü ve cihaz alarm/hata kodlarına bak","Akü ayırma/birleştirme (ACR) rölesini kontrol et"]},
+{name:"Kara Beslemesi (Shore Power)",re:/shore|sahil|kara\s*bes/i,kw:["shore","power","isolation","transformer","earth","breaker"],checks:["Kara besleme fişi/prizi ve kablo hasarını kontrol et","Faz sırası, gerilim ve frekansı ölç","Kaçak akım rölesi ve izolasyon trafosu durumuna bak","Jeneratör–kara beslemesi interlock (kilitleme) devresini doğrula","Şalter ve kontaktör bobin gerilimlerini kontrol et"]},
+{name:"Watermaker",re:/watermaker|osmos|su\s*yap/i,kw:["watermaker","reverse osmosis","high pressure","flow","salinity","pump"],checks:["Besleme sigortası ve kontrol panosu gerilimini kontrol et","Ön besleme (low pressure) pompası ve flow switch sinyalini doğrula","Ön filtre tıkanıklığını ve düşük basınç şalterini kontrol et","Yüksek basınç pompası kontaktörü ve termik rölesini kontrol et","Tuzluluk (salinity) probu ve solenoid valf beslemesini ölç"]},
+{name:"Klima / Chiller",re:/klima|chiller|air\s*cond|frigomar|a\/c/i,kw:["chiller","air conditioning","compressor","sea water","flow","pressure switch","thermostat"],checks:["Deniz suyu pompasının çalıştığını ve flow switch sinyalini doğrula","Yüksek/alçak basınç şalterlerinin durumunu kontrol et","Kompresör kontaktörü ve faz izleme rölesini kontrol et","Termostat/kumanda kartı besleme ve set değerini kontrol et","Besleme fazlarını ve gerilim dengesini ölç"]},
+{name:"Yangın Damperi",re:/damper|yang[iı]n\s*klap|fire\s*damper/i,kw:["damper","fire","actuator","limit","galley","vent","fusible"],checks:["Aktüatör besleme gerilimini ölç","Limit anahtarları ile açık/kapalı geri bildirimini kontrol et","Yangın alarm panosu sinyali ve manuel reset durumuna bak","Termal sigortayı (fusible link) ve mekanik sıkışmayı kontrol et"]},
+{name:"Yakıt Sistemi",re:/yak[iı]t|fuel/i,kw:["fuel","transfer","solenoid","level","pump","emergency"],checks:["Yakıt transfer pompası sigortası ve kontaktörünü kontrol et","Seviye şamandırası/sensör ve solenoid valf beslemesini ölç","Acil yakıt kesme (emergency shut-off) durumunu doğrula"]},
+{name:"Ana Makine",re:/ana\s*makine|main\s*engine/i,kw:["main engine","shutdown","emergency","oil pressure","start","interlock","turning gear"],checks:["Acil stop ve shutdown devrelerinin resetli olduğunu doğrula","Start interlock (turning gear, vites konumu) sinyallerini kontrol et","Start sigortası, start rölesi ve akü gerilimini ölç","Yağ basıncı/soğutma suyu sensörleri ile alarm panosuna bak"]},
+{name:"PLC / Otomasyon",re:/\bplc\b|otomasyon/i,kw:["plc","input","output","24v","power supply","communication","watchdog"],checks:["24VDC besleme ve güç kaynağı sigortasını ölç","Giriş/çıkış LED'lerini ve kart hata ışıklarını kontrol et","Haberleşme kablosu/bağlantısını ve watchdog durumunu doğrula","Çıkış röle/sigortalarını ve saha sinyal kablolarını kontrol et"]}
+];
+const SYM=[
+{re:/start|çal[iı][sş]m[iı]yor|calism[iı]yor|d[oö]nm[uü]yor|al[mn][iı]yor|çal[iı][sş]t[iı]r|not work|won't|fail/i,kw:["start","relay","fuse"],checks:["Sırayla ilerle: besleme → sigorta/kesici → kumanda gerilimi → emniyet zinciri (acil stop, interlock) → çıkış rölesi","Elemanı sökmeden önce kumanda gerilimini ölçerek hatanın nerede başladığını daralt"]},
+{re:/trip|at[iı]yor|sigorta|kesici|fuse|breaker|blow/i,kw:["breaker","fuse","overload"],checks:["Kısa devre ve toprak kaçağı için kabloyu izolasyon ölçümüyle kontrol et","Termik/kesici ayar akımını plaka değeriyle karşılaştır","Kesiciyi arka arkaya tekrar devreye alma; önce nedeni bul"]},
+{re:/[iı]s[iı]n|s[iı]cak|overheat|temp/i,kw:["temperature","thermal","cooling"],checks:["Gevşek klemens/kablo bağlantılarını ve renk değişimini kontrol et","Soğutma/havalandırma ve termik sensör devresini doğrula"]},
+{re:/titre|gürültü|gurultu|vibr|ses\b|noise/i,kw:["motor","bearing"],checks:["Rulman, kaplin hizalaması ve montaj ayaklarını kontrol et","Faz dengesizliğini ve tek faza düşmeyi ölç"]},
+{re:/gerilim|voltaj|volt\b|enerji\s*yok|besleme\s*yok|d[uü][sş][uü]k|no power|low volt/i,kw:["voltage","supply","fuse","terminal"],checks:["Beslemeyi kaynaktan yüke doğru ölç; gerilimin kaybolduğu noktayı bul","Klemens, sigorta ve kontak bağlantılarında gerilim düşümünü kontrol et"]},
+{re:/alarm|fault|hata|ar[iı]za\s*kodu/i,kw:["alarm","fault"],checks:["Alarm/hata kodunu ve kayıt geçmişini not al, sonra reset et","İlgili sensör ve emniyet devresinin kapalı olduğunu doğrula"]},
+{re:/bas[iı]n[cç]|pressure/i,kw:["pressure","switch","sensor"],checks:["Basınç şalteri/transmitter besleme ve sinyalini kontrol et","Hat kaçağı, filtre tıkanıklığı ve pompa performansına bak"]}
+];
+function matchKB(q){const eq=KB.filter(k=>k.re.test(q)).slice(0,2),sy=SYM.filter(s=>s.re.test(q)).slice(0,3);return{eq,sy,kw:[...new Set([...eq.flatMap(e=>e.kw),...sy.flatMap(s=>s.kw)])]}}
+/* ---- Kontrol listeleri: İngilizce (TR dışındaki diller için) ---- */
+const KB_EN=[
+{n:"Generator",c:["Measure start battery voltage and check terminal connections (24V/12V)","Check emergency stop buttons and the alarm / common-fault lamp on the control panel","Check fuel valves and the fuel/stop solenoid supply","Measure the start fuse and start relay/contactor coil voltage","Verify the shutdown circuit sensors (oil pressure, coolant temperature, level) are closed","Check the charging alternator / excitation (D+) circuit","After starting, verify the main breaker, output voltage and phase sequence"]},
+{n:"Pump",c:["Check whether the supply fuse/breaker has tripped","Check the thermal overload relay trip state and reset it","Measure contactor coil voltage and contact output","Check the float / pressure switch / level switch and the MAN-OFF-AUTO selector","Measure motor winding resistance, insulation (megger) and phase balance","Check rotation direction and that the pump is primed"]},
+{n:"Fan / Ventilation",c:["Check the supply fuse and thermal protection","Measure the contactor / star-delta relay coil voltage","Verify the damper limit switches give an open signal (interlock)","Check rotation direction and that the impeller/belt/bearings turn freely"]},
+{n:"Compressor",c:["Check the pressure switch setting and contact","Verify the thermal relay and contactor state","Measure the unloader / drain valve solenoid supply","Check oil level and the low-oil protection signal","Measure motor supply phases and voltage balance"]},
+{n:"Thruster",c:["Check the thruster main switch/isolator and the main (high-current) fuse","Measure battery voltage under load (voltage drop, cable heating)","Check direction contactor / solenoid coil voltage","Verify joystick / control panel supply and signal","Check thermal protection and over-temperature trip state","If hydraulic, check oil level and the pump supply circuit"]},
+{n:"Steering System",c:["Check the steering pump motor supply fuse and contactor","Measure the direction solenoid valve coil voltage","Verify rudder reference/feedback unit signal and wiring","Check autopilot / control unit supply","Check hydraulic oil level and look for leaks"]},
+{n:"Battery / Charger / Inverter",c:["Measure battery terminal voltages and check connection tightness","Check the main DC fuse and battery isolator","Measure charger AC input and DC output","Check the temperature sensor and unit alarm/fault codes","Check the battery combiner (ACR) relay"]},
+{n:"Shore Power",c:["Inspect the shore power plug/socket and cable for damage","Measure phase sequence, voltage and frequency","Check the residual-current device and isolation transformer","Verify the generator–shore power interlock circuit","Check breaker and contactor coil voltages"]},
+{n:"Watermaker",c:["Check the supply fuse and control panel voltage","Verify the low-pressure feed pump and flow switch signal","Check pre-filter clogging and the low-pressure switch","Check the high-pressure pump contactor and thermal relay","Measure the salinity probe and solenoid valve supply"]},
+{n:"Air Conditioning / Chiller",c:["Verify the sea-water pump is running and the flow switch signal","Check the high/low pressure switches","Check the compressor contactor and phase monitor relay","Check thermostat/control board supply and set point","Measure supply phases and voltage balance"]},
+{n:"Fire Damper",c:["Measure the actuator supply voltage","Check the limit switches and open/closed feedback","Check the fire alarm panel signal and manual reset state","Check the fusible link and mechanical jamming"]},
+{n:"Fuel System",c:["Check the fuel transfer pump fuse and contactor","Measure level float/sensor and solenoid valve supply","Verify the emergency fuel shut-off state"]},
+{n:"Main Engine",c:["Verify emergency stop and shutdown circuits are reset","Check start interlock signals (turning gear, gear position)","Measure start fuse, start relay and battery voltage","Check oil pressure / coolant sensors and the alarm panel"]},
+{n:"PLC / Automation",c:["Measure the 24VDC supply and power-supply fuse","Check input/output LEDs and module fault lights","Verify communication cabling and watchdog state","Check output relays/fuses and field signal wiring"]}
+];
+const SYM_EN=[
+["Work step by step: supply → fuse/breaker → control voltage → safety chain (e-stop, interlocks) → output relay","Measure control voltage before removing parts to narrow down where the fault starts"],
+["Check cable insulation (megger) for short circuits and earth leakage","Compare thermal/breaker setting with the nameplate current","Do not keep re-closing the breaker; find the cause first"],
+["Check loose terminals/cable connections and discolouration","Verify cooling/ventilation and the thermal sensor circuit"],
+["Check bearings, coupling alignment and mounting feet","Measure phase imbalance and single-phasing"],
+["Measure the supply from source towards load to find where voltage is lost","Check voltage drop across terminals, fuses and contacts"],
+["Note the alarm/fault code and history, then reset","Verify the related sensor and safety circuit are closed"],
+["Check pressure switch/transmitter supply and signal","Look for line leaks, clogged filters and pump performance"]
+];
+function kbHtml(k){if(!k.eq.length&&!k.sy.length)return"";const tr=LANG==="tr",li=a=>a.map(x=>`<label class="ck"><input type="checkbox"><span>${esc(x)}</span></label>`).join(""),nm=e=>tr?e.name:(KB_EN[KB.indexOf(e)]||{}).n||e.name,ck=e=>tr?e.checks:(KB_EN[KB.indexOf(e)]||{}).c||e.checks,sc=s=>tr?s.checks:(SYM_EN[SYM.indexOf(s)]||s.checks);return `<div class="kbox">${k.eq.map(e=>`<b>🔧 ${esc(t("kbList",nm(e)))}</b>${li(ck(e))}`).join("")}${k.sy.length?`<b>⚠ ${esc(t("kbSym"))}</b>${li([...new Set(k.sy.flatMap(sc))])}`:""}</div>`}
+/* ---- Dil uygulama ve seçici ---- */
+function applyGreet(){$("greet").textContent=nm?t("greet",nm):""}
+function applyLang(){
+ document.documentElement.lang=LANG;
+ document.querySelectorAll("[data-i18n]").forEach(e=>e.textContent=t(e.dataset.i18n));
+ document.querySelectorAll("[data-i18n-html]").forEach(e=>e.innerHTML=t(e.dataset.i18nHtml));
+ document.querySelectorAll("[data-i18n-ph]").forEach(e=>e.placeholder=t(e.dataset.i18nPh));
+ applyGreet();
+ let m=$("badge").textContent.match(/(\d+)\/(\d+)/);$("badge").textContent=t("page",m?m[1]:0,m?m[2]:0);
+ document.querySelectorAll(".page").forEach(p=>{let s=p.querySelector(".ph span");if(s)s.textContent=t("pageN",p.dataset.page)});
+ if(total){renderResults(new Map(currentElements.map(e=>[e.ref,e])),new Map(currentEquipment.map(e=>[e.name,e])));$("status").textContent=t("done",total,currentElements.length,currentEquipment.length)}
+ else{$("elCount").textContent=t("wait");$("eqCount").textContent=t("wait");$("title").textContent=t("view");if(PDFJS)$("status").textContent=t("ready")}
+ renderLib();
+}
+{const sel=$("lang");sel.innerHTML=Object.entries(LANGS).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");sel.value=LANG;sel.onchange=()=>{LANG=sel.value;try{localStorage.aheLang=LANG}catch(e){}applyLang()}}
+applyLang();
+</script></body></html>
